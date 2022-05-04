@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { map } from 'rxjs';
+import { Post } from './post.model';
+import { PostsService } from './posts.service';
 
 @Component({
   selector: 'app-root',
@@ -9,52 +11,51 @@ import { map } from 'rxjs';
 })
 export class AppComponent implements OnInit {
   loadedPosts = [];
+  isFetching:boolean=false;
+  error=null;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private postsService:PostsService
+    ) {}
 
   ngOnInit() {
+    this.fetchPosts();
   }
 
-  onCreatePost(postData: { title: string; content: string }) {
-    // Send Http request
-    console.log(postData);
-    this.http.post('http://127.0.0.1:5000/',postData,)
-    .subscribe(responseData=>{
-      console.log(responseData);
-    });
-  }
-
-  onGetPosts(){
-    this.http.get('http://127.0.0.1:5000/')
-    .subscribe(responseData=>{
-      console.log(responseData);
-    })
+  onCreatePost(postData: Post) {
+    this.postsService.sendPostData(postData);
   }
 
   onFetchPosts() {
-    this.fetchPosts
+    this.fetchPosts();
   }
 
   onClearPosts() {
     // Send Http request
+    if (window.confirm('You sure you want to delete all posts?'))
+    {
+      this.postsService.deleteAll()
+      .subscribe(response=>{
+        console.log(response);
+        this.loadedPosts=[];
+        window.alert(response['message'])
+      })
+    }
   }
 
   private fetchPosts(){
-    this.http
-    .get('http://127.0.0.1:5000/')
-    .pipe(map(responceData=>{
-      const postArray=[];
-      for(const key in responceData){
-        if(responceData.hasOwnProperty(key)){
-          postArray.push({ ...responceData[key],id:key})
-        }
-      }
-      return postArray;
-    }))
-    .subscribe(
-      post=>{
-        console.log(post);
-      }
-    );
-  };
+    this.isFetching=true;
+    this.postsService
+      .fetchPosts()
+      .subscribe(
+        posts => {
+          console.log(posts);
+          this.loadedPosts = posts;
+          this.isFetching=false;
+        },error=>{
+          this.error=error.message;
+          console.log(error);
+        });
+  }
 }
