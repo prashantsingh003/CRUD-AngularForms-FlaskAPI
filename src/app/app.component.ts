@@ -50,12 +50,17 @@ export class AppComponent implements OnInit {
       .fetchPosts()
       .subscribe(
         posts => {
-          console.log(posts);
+          // console.log(posts);
           this.loadedPosts = posts;
           this.isFetching=false;
         },error=>{
           this.error=error.message;
           console.log(error);
         });
+  }
+
+  handleError(){
+    this.isFetching=false;
+    this.error=null;
   }
 }

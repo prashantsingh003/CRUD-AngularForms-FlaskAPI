@@ -39,7 +39,6 @@
       <button class="btn btn-primary" (click)="onFetchPosts()">
         Fetch Posts
       </button>
-      |
       <button
         class="btn btn-danger"
         [disabled]="loadedPosts.length < 1"
@@ -62,6 +61,7 @@
       <div *ngIf="error" class="alert alert-danger">
         <h2>An error has occoured</h2>
         <p>{{error}}</p>
+        <button class=" btn btn-danger" (click)="handleError()">Handle Error</button>
       </div>
     </div>
   </div>
